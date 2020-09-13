@@ -1,0 +1,28 @@
+ 10 150 3
+Milstone 2 Easy
+Liew Kuan Yung
+1191301064
+
+15 10
+20 30
+
+du Y rot90
+
+
+/*********************************************
+/USER GUIDANCE
+/Remember to save the file for any changes
+*********************************************/
+// 1.) Drawing character (inception will be activated if drawingChar is empty (space) )
+// 2.) Speed of refresh cycle (*1 min ~ 10 max)
+// 3.) Time lapse
+// 4.) flash show = num of phrases
+// 5.) Phrase (max 25 words, valid for a~z, A~Z, 0~9,and (space) only)
+// 6.) other phrases (please write them in next line for each phrases)
+
+// 7.) Anchor point (x y)
+// 8.) Board size (x y)
+
+// 9.) Direction (lr rl ud du st) *look the last alphabet
+// 10.) Wrap-around (Y/N) yes or no
+// 11.) Rotation (-90 +90 mr non)  *(mr = mirror)

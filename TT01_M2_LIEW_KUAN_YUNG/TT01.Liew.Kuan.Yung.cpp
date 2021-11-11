@@ -3,11 +3,6 @@ Program: main.cpp
 Course: Programming Fundamentals (TCP1101)
 Year: 2019/20 Trimester 1
 Name: Liew Kuan Yung
-ID: 1191301064
-Lecture Section: TC01
-Tutorial Section: TT01
-Email: ky99ace@gmail.com
-Phone: 018-7900166
 **********|**********|**********/
 
 

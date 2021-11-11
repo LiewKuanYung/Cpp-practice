@@ -1,0 +1,417 @@
+//Background character
+char backChar = '.';
+
+int main()
+{
+/************************************************************
+//Input file
+************************************************************/
+
+    string stringText;  //Phrase in string (to be convert to charArray at line 48
+    char drawingChar;   //Drawing Character
+    int speed;          //Refresh cycle
+    int timeLapse;      //Number of refresh cycle
+    int anchorX;        //Anchor Dot
+    int anchorY;
+    int horizontalSize; //Board size
+    int verticalSize;
+    string direction;   //Movement direction
+    char wrapping;      //Wrapping effect
+    string rotation;    //rot90 , rot-90, mr, non
+    int flashShow;      //number of flashShow
+
+    //Open file
+    fstream inputFile;
+    inputFile.open("user_input.txt");
+
+    //Get input from file
+    inputFile >> drawingChar;
+    inputFile >> speed;
+    inputFile >> timeLapse;
+    inputFile >> flashShow;
+    inputFile.ignore();
+    getline(inputFile, stringText, '\n');
+    inputFile >> anchorX >> anchorY;
+    inputFile >> horizontalSize >> verticalSize;
+    inputFile >> direction;
+    inputFile >> wrapping;
+    inputFile >> rotation;
+
+    char charText[stringText.size()];             //copy string into char array
+    stringText.copy(charText, stringText.size());
+
+    ///Checking validation of input file
+    if(stringText.size()>25){cout<<"size of phrase error"; return 0;}
+    else if(speed<1 || speed>10){cout<<"speed error"; return 0;}
+    else if(timeLapse<=0){cout<<"time lapse error"; return 0;}
+    else if(anchorX<0 && anchorY<0){cout<<"anchor dot error"; return 0;}
+    else if(horizontalSize<=0 && verticalSize<=0){cout<<"board size error"; return 0;}
+    else if(anchorX>=horizontalSize || anchorY>=verticalSize){cout<<"anchor dot does not match board size"; return 0;}
+    else if(direction!="st" && direction!="lr" && direction!="rl" && direction!="ud" && direction!="du"){cout<<"direction error"; return 0;}
+    else if(wrapping!='Y' && wrapping!='N'){cout<<"wrapping error"; return 0;}
+    else if(rotation!="rot90" && rotation!="rot-90" && rotation!="mr" && rotation!="non"){cout<<"rotation error"; return 0;}
+    else;
+
+    ///Cout input from file for checking
+    cout <<drawingChar<<" "<<speed<<" "<<timeLapse<<" "<<flashShow<<" "<<stringText.size()<<endl;
+    for(int count = 0; count < stringText.size(); count++) cout << charText[count];
+    cout<<endl<<anchorX<<" "<<anchorY<<" "<<horizontalSize<<" "
+        <<verticalSize<<endl<<direction<<" "<<wrapping<<" "<<rotation;
+
+    //close file
+    inputFile.close();
+
+
+/************************************************************
+//Initialization of phrase array
+************************************************************/
+//set character
+//Rotation or mirror (optional)
+//pass character into phrase array to form long string with array
+/*
+    ///L = Length of the string text
+    const int L = stringText[num].size();
+
+    ///Initialize size of columns and rows of phrase array
+    int R = 0, C = 0;
+    if (rotation=="rot90" || rotation=="rot-90")
+    {
+        R = 6*stringText[num].size();
+        C = 7;
+    }
+    else if(rotation=="non" || rotation=="mr")
+    {
+        R = 7;
+        C = 6*stringText[num].size();
+    }else return 0;
+
+    char phrase[R][C];          //combined character arrays
+    char eachCharacter[7][6];   //individual character array
+    char rotatedChar[6][7];     //rotated character array
+
+    ///Passing each character into phrase array to form phrase of the array according to rotation
+    if(rotation == "non")
+    {
+        for(int num = 0, nextPos = 0; num < L ; num++, nextPos += 6)
+        {
+            emptyBackground(eachCharacter);
+            setCharacter(charText,eachCharacter,num);
+            for(int r = 0; r <7; r++)
+            {
+                for( int c = 0; c < 6; c++)
+                phrase[r][c+nextPos] = eachCharacter[r][c];
+            }
+        }
+    }
+    else if(rotation =="rot90")
+    {
+        for(int num = 0, nextPos = 0; num < L ; num++, nextPos += 6)
+        {
+            emptyBackground(eachCharacter);
+            setCharacter(charText,eachCharacter,num);
+            setRotation(eachCharacter, rotatedChar,rotation);
+            for(int r = 0; r <6; r++)
+            {
+                for( int c = 0; c < 7; c++)
+                phrase[r+nextPos][c]=rotatedChar[r][c];
+            }
+        }
+    }
+    else if(rotation =="rot-90")
+    {
+        for(int num = 0, nextPos = 6*(L-1); num < L ; num++, nextPos -= 6)
+        {
+            emptyBackground(eachCharacter);
+            setCharacter(charText,eachCharacter,num);
+            setRotation(eachCharacter, rotatedChar, rotation);
+            for(int r = 0; r <6; r++)
+            {
+                for( int c = 0; c < 7; c++)
+                phrase[r+nextPos][c]=rotatedChar[r][c];
+            }
+        }
+    }
+    else if(rotation =="mr")
+    {
+        for(int num = 0, nextPos = 0; num < L ; num++, nextPos += 6)
+        {
+            emptyBackground(eachCharacter);
+            setCharacter(charText,eachCharacter,num);
+            for(int r = 0; r <7; r++)
+            {
+                for( int c = 0; c < 6; c++)
+                phrase[r][c+nextPos] = eachCharacter[6-r][c];
+            }
+        }
+    }
+    else return 0;
+
+    ///Cout phrase array for checking
+/*    //N and mr
+    for(int i=0;i<7;i++){for(int j=0;j<L*6;j++)
+    {cout << phrase[i][j];}cout << endl;}
+    //rot90 and rot-90
+    for(int i=0;i<L*6;i++){for(int j=0;j<7;j++)
+    {cout << phrase[i][j];}cout << endl;}
+*/
+
+/************************************************************
+//Initialization of display board array
+************************************************************/
+/*
+    int displayX = 0;   //horizontal size
+    int displayY = 0;   //vertical size
+
+    //Initialize columns and rows of display board array
+    if (rotation=="rot90" || rotation=="rot-90")
+    {
+
+        displayX = horizontalSize;
+        displayY = verticalSize + 6*stringText[num].size();
+    }
+    else if(rotation=="non" || rotation=="mr")
+    {
+        displayX = horizontalSize + 6*stringText[num].size();
+        displayY = verticalSize;
+    }else return 0;
+
+    //initialize
+    char displayBoard[displayY][displayX];
+
+    //empty background avoid garbage value
+    for(int rows=0; rows<displayY; ++rows)
+    {
+        for(int cols=0; cols<displayX; ++cols)
+        displayBoard[rows][cols]=backChar;
+    }
+
+    ///reinitialize anchor dot and checking anchor dot validation
+    if(rotation=="non")
+    {
+        if(anchorY<6){cout<<"value of anchor Y too small"; return 0;}
+        else anchorY = (verticalSize-1)- anchorY;
+    }
+    else if(rotation=="mr")
+    {
+        if(anchorY>verticalSize-7){cout<<"value of anchor Y too big"; return 0;}
+        else anchorY = (verticalSize-1) - anchorY - 6;
+    }
+    else if(rotation=="rot90")
+    {
+        if(anchorX<6){cout<<"value of anchor X too small"; return 0;}
+        else anchorX = anchorX - 6;
+        anchorY = (verticalSize-1) - anchorY;
+    }
+    else
+    {
+        if(anchorX>horizontalSize-7){cout<<"value of anchor X too big";return 0;}
+        else anchorY = (verticalSize-anchorY) + verticalSize;
+    }
+
+    if(rotation!="rot-90")
+    {
+        for(int rows=0; rows<R; ++rows)
+        {
+            for(int cols=0; cols<C; ++cols)
+            displayBoard[anchorY + rows][anchorX + cols] = phrase[rows][cols];
+        }
+    }
+    else ///rot-90
+    {
+        int k = 6*stringText[num].size() - (anchorY - verticalSize);
+        int z = 0;
+
+        for(int rows = 0; rows<R; ++rows)
+        {
+            for(int cols=0; cols<C; ++cols)
+            displayBoard[anchorY + rows - z][anchorX + cols] = phrase[rows][cols];
+
+            if(rows == k)
+            {
+                anchorY = 0;
+                z = rows;
+            }
+            else;
+        }
+    }
+
+    ///Cout "entire" display board for checking
+/*    for(int rows = 0; rows < displayY; rows++)
+    {for(int cols = 0; cols < displayX; cols++)
+    {cout << displayBoard[rows][cols];}cout << endl;}
+*/
+
+/************************************************************
+//Composition of movements / Display / Delay / ClearScreen
+************************************************************/
+/*
+    if(direction == "st" )//stationary
+    {
+        for(int rows = 0; rows < verticalSize; ++rows)
+        {
+            for(int cols = 0; cols < horizontalSize; ++cols)
+            {cout << displayBoard[rows][cols];}
+            cout << endl;
+        }
+    }
+    else if(direction == "lr") //moving to the right
+    {
+        char copyArray[verticalSize];
+
+        for(int i=0; i<timeLapse; ++i )
+        {
+            ///Display
+            for(int rows = 0; rows < verticalSize; ++rows)
+            {
+                for(int cols = 0; cols < horizontalSize; ++cols)
+                {cout << displayBoard[rows][cols];}
+                cout << endl;
+            }
+
+            ///Composition
+            for(int rows=0; rows<verticalSize; ++rows)
+            copyArray[rows] = displayBoard[rows][0];
+
+            for(int rows=0; rows<verticalSize; ++rows)
+            {
+                for(int cols = 0; cols < displayX; ++cols)
+                displayBoard[rows][cols] = displayBoard[rows][cols+1];
+            }
+
+            ///Wrap around effect
+            if(wrapping == 'Y')
+            {
+                for(int rows=0; rows<verticalSize; ++rows)
+                displayBoard[rows][displayX-1] = copyArray[rows];
+            }
+            else
+            {
+                for(int rows=0; rows<verticalSize; ++rows)
+                displayBoard[rows][displayX-1] = '.';
+            }
+            delay(speed);
+            clearScreen();
+        }
+    }
+    else if(direction == "rl")//moving to the left
+    {
+        char copyArray[verticalSize];
+
+        for(int i=0; i<timeLapse; ++i )
+        {
+            ///Display
+            for(int rows = 0; rows < verticalSize; ++rows)
+            {
+                for(int cols = 0; cols < horizontalSize; ++cols)
+                {cout << displayBoard[rows][cols];}
+                cout << endl;
+            }
+
+            ///Composition
+            for(int rows=0; rows<verticalSize; ++rows)
+            copyArray[rows] = displayBoard[rows][displayX-1];
+
+            for(int rows=0; rows<verticalSize; ++rows)
+            {
+                for(int cols = displayX-1; cols>=0; --cols)
+                displayBoard[rows][cols] = displayBoard[rows][cols-1];
+            }
+
+            ///Wrap around effect
+            if(wrapping == 'Y')
+            {
+                for(int rows=0; rows<verticalSize; ++rows)
+                displayBoard[rows][0] = copyArray[rows];
+            }
+            else
+            {
+                for(int rows=0; rows<verticalSize; ++rows)
+                displayBoard[rows][0] = '.';
+            }
+            delay(speed);
+            clearScreen();
+        }
+    }
+    else if(direction == "ud")//moving down
+    {
+        char copyArray[horizontalSize];
+
+        for(int i=0; i<timeLapse; ++i )
+        {
+            ///Display
+            for(int rows = 0; rows < verticalSize; ++rows)
+            {
+                for(int cols = 0; cols < horizontalSize; ++cols)
+                {cout << displayBoard[rows][cols];}
+                cout << endl;
+            }
+
+            ///Composition
+            for(int cols=0; cols<horizontalSize; ++cols)
+            copyArray[cols] = displayBoard[displayY-1][cols];
+
+            for(int cols=0; cols<horizontalSize; cols++)
+            {
+                for(int rows = displayY-1; rows>=0; --rows)
+                displayBoard[rows][cols] = displayBoard[rows-1][cols];
+            }
+
+            ///Wrap around effect
+            if(wrapping == 'Y')
+            {
+                for(int cols=0; cols<horizontalSize; ++cols)
+                displayBoard[0][cols] = copyArray[cols];
+            }
+            else
+            {
+                for(int cols=0; cols<horizontalSize; ++cols)
+                displayBoard[0][cols] = '.';
+            }
+            delay(speed);
+            clearScreen();
+        }
+    }
+    else if(direction == "du")//moving up
+    {
+        char copyArray[horizontalSize];
+
+        for(int i=0; i<timeLapse; ++i )
+        {
+            ///Display
+            for(int rows = 0; rows < verticalSize; ++rows)
+            {
+                for(int cols = 0; cols < horizontalSize; ++cols)
+                {cout << displayBoard[rows][cols];}
+                cout << endl;
+            }
+
+            ///Composition
+            for(int cols=0; cols<horizontalSize; ++cols)
+            copyArray[cols] = displayBoard[0][cols];
+
+            for(int cols=0; cols<horizontalSize; cols++)
+            {
+                for(int rows=0; rows<displayY-1; rows++)
+                displayBoard[rows][cols] = displayBoard[rows+1][cols];
+            }
+
+            ///Wrap around effect
+            if(wrapping == 'Y')
+            {
+                for(int cols=0; cols<horizontalSize; ++cols)
+                displayBoard[displayY-1][cols] = copyArray[cols];
+            }
+            else
+            {
+                for(int cols=0; cols<horizontalSize; ++cols)
+                displayBoard[displayY-1][cols] = backChar;
+            }
+            delay(speed);
+            clearScreen();
+        }
+    }
+    else;
+}*/
+    cout << "\n\nThank you and have a nice day\n\n";
+    return 0;
+}
